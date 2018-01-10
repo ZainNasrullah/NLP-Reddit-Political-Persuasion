@@ -41,13 +41,17 @@ def preproc1( comment , steps=range(1,11)):
 
     print(modComm)
 
+    # need to deal with abbreviations
     if 4 in steps:
-        # need to deal with more abbreviations
+
         modComm = re.sub(r"\s?([^\w\s'\-]+|(\w\.\w\.))\s?", r" \1 ", modComm)
         modComm = re.sub('\s{2,}', r'\s', modComm)
 
-    # To do / fix
+    # need to deal with clitics
     if 5 in steps:
+
+        re.sub(r"(\w)('(\W|s))", r'\1 \2', modComm)
+
         while re.search(r"(\w+)('\w*)", modComm):
             p = re.search(r"(\w+)('\w*)", modComm)
             if p.group(2) == "'":
@@ -62,6 +66,7 @@ def preproc1( comment , steps=range(1,11)):
 
     print(modComm)
 
+    # need to deal with punctuation tagging
     if 6 in steps:
         utt = nlp(modComm)
         modComm = ''
@@ -75,6 +80,7 @@ def preproc1( comment , steps=range(1,11)):
     if 7 in steps:
         with open("/u/cs401/Wordlists/StopWords", "r") as file:
             stop_words = file.read().split('\n')
+
         tokenList = modComm.split()
         modList = []
         for token in tokenList:
@@ -86,7 +92,6 @@ def preproc1( comment , steps=range(1,11)):
 
     print(modComm)
 
-    # to do
     if 8 in steps:
         utt = nlp(modComm)
         for token in utt:
@@ -95,6 +100,7 @@ def preproc1( comment , steps=range(1,11)):
 
     print(modComm)
 
+    # find end of lines and deal with abbreviations
     if 9 in steps:
         pass
 
@@ -133,7 +139,6 @@ def main( args ):
             # TODO: replace the 'body' field with the processed text
                 k['body'] = preproc1(k['body'])
 
-            
             # TODO: append the result to 'allOutput'
                 allOutput.append(k)
 
