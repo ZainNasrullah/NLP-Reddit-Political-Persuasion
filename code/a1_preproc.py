@@ -22,25 +22,29 @@ def preproc1( comment , steps=range(1,11)):
     Returns:
         modComm : string, the modified comment 
     '''
-
+    
     modComm = comment
     nlp = spacy.load('en', disable=['parser', 'ner'])
 
     print(comment)
-
+    
+    # step 1: simple string replacement of all new line characters by a blank
     if 1 in steps:
         modComm = modComm.replace('\n', '')
 
     print(modComm)
-
+    
+    # step 2: convert all html tags to unicode using the html parser
     if 2 in steps:
         modComm = html.unescape(modComm)
-
+    
+    # step 3: remove all urls starting with http or www using regular expressions
     if 3 in steps:
         modComm = re.sub(r'(http|www)\S+', '', modComm)
 
     print(modComm)
-
+    
+    # step 4: add white space to around punctuation excluding apostrophe, multiple punctuation, and abbreviations
     if 4 in steps:
 
         # replace periods excluding abbreviations
@@ -54,7 +58,7 @@ def preproc1( comment , steps=range(1,11)):
         modComm = re.sub(r"\s?([^\w.\s'\-]+|(\w\.\w\.))\s?", r" \1 ", modComm)
         modComm = re.sub('\s{2,}', r'\s', modComm)
 
-    # need to deal with clitics
+    # TODO step 5: separate into clitics
     if 5 in steps:
 
         re.sub(r"(\w)('(\W|s))", r'\1 \2', modComm)
@@ -68,22 +72,25 @@ def preproc1( comment , steps=range(1,11)):
             else:
                 modComm = modComm.replace(p.group(0), p.group(1)[:-1] + ' ' + p.group(1)[-1] + p.group(2))
 
-
         modComm = re.sub('\s{2,}', r'\s', modComm)
 
     print(modComm)
 
-    # need to deal with punctuation tagging / manually tokenize
+    # step 6: tokenize string and add tags
     if 6 in steps:
-        utt = nlp(modComm)
+        tokens = modComm.split()
+        doc = spacy.tokens.Doc(nlp.vocab, words=tokens)
+        doc = nlp.tagger(doc)
+        
         modComm = ''
         # each punctuation treated as an independent token
-        for token in utt:
+        for token in doc:
             modComm += token.text + '/' + token.tag_ + ' '
         modComm = modComm[:-1]
 
     print(modComm)
-
+    
+    # step 7: remove stop words
     if 7 in steps:
         with open("/u/cs401/Wordlists/StopWords", "r") as file:
             stop_words = file.read().split('\n')
@@ -98,7 +105,8 @@ def preproc1( comment , steps=range(1,11)):
         modComm = ' '.join(modList)
 
     print(modComm)
-
+    
+    # step 8: replace tokens with lemmas except if lemma starts with a dash 
     if 8 in steps:
         utt = nlp(modComm)
         for token in utt:
@@ -107,10 +115,11 @@ def preproc1( comment , steps=range(1,11)):
 
     print(modComm)
 
-    # find end of lines and deal with abbreviations
+    # step 9: find end of lines and deal with abbreviations
     if 9 in steps:
         pass
-
+    
+    # convert text to lower case
     if 10 in steps:
         modComm = modComm.lower()
 
