@@ -41,10 +41,17 @@ def preproc1( comment , steps=range(1,11)):
 
     print(modComm)
 
-    # need to deal with abbreviations
     if 4 in steps:
 
-        modComm = re.sub(r"\s?([^\w\s'\-]+|(\w\.\w\.))\s?", r" \1 ", modComm)
+        # replace periods excluding abbreviations
+        with open('/u/cs401/Wordlists/abbrev.english', "r") as file:
+            abbrevs = file.read().split('.\n')
+        abbrevs_look = [r'(?<!\b' + a + r'\b)' for a in abbrevs]
+        b = ''.join(abbrevs_look[:-1])
+        re.sub(b + "(\W?\.\W+)", r' \1 ', modComm)
+
+        # replace all punctuation but periods, also handle special abbreviations like e.g.
+        modComm = re.sub(r"\s?([^\w.\s'\-]+|(\w\.\w\.))\s?", r" \1 ", modComm)
         modComm = re.sub('\s{2,}', r'\s', modComm)
 
     # need to deal with clitics
@@ -66,7 +73,7 @@ def preproc1( comment , steps=range(1,11)):
 
     print(modComm)
 
-    # need to deal with punctuation tagging
+    # need to deal with punctuation tagging / manually tokenize
     if 6 in steps:
         utt = nlp(modComm)
         modComm = ''
