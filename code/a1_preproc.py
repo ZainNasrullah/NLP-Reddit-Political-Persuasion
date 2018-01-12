@@ -10,6 +10,11 @@ import string
 import spacy
 
 indir = '/u/cs401/A1/data/';
+stopWordPath = '/u/cs401/Wordlists/abbrev.english';
+Windows = None
+
+if Windows:
+    stopWordPath = 'C:\\Users\\zainn\\nlp\\NLP-Reddit-Political-Persuasion\\StopWords'
 
 def preproc1( comment , steps=range(1,11)):
     ''' This function pre-processes a single comment
@@ -29,7 +34,7 @@ def preproc1( comment , steps=range(1,11)):
 
     # step 1: simple string replacement of all new line characters by a blank
     if 1 in steps:
-        modComm = modComm.replace('\n', '')
+        modComm = modComm.replace('\n', ' ')
 
     print("step1", modComm)
 
@@ -49,7 +54,7 @@ def preproc1( comment , steps=range(1,11)):
     if 4 in steps:
 
         # replace periods excluding abbreviations
-        with open('/u/cs401/Wordlists/abbrev.english', "r") as file:
+        with open(stopWordPath, "r") as file:
             abbrevs = file.read().split('.\n')
         abbrevs_look = [r'(?<!\b' + a + r'\b)' for a in abbrevs]
         abbrevs_regex = ''.join(abbrevs_look[:-1])
@@ -57,7 +62,7 @@ def preproc1( comment , steps=range(1,11)):
 
         # replace all punctuation but periods, also handle special abbreviations like e.g.
         modComm = re.sub(r"\s?([^\w.\s'\-]+|(\w\.\w\.))\s?", r" \1 ", modComm)
-        modComm = re.sub('\s{2,}', r'\s', modComm)
+        modComm = re.sub('\s{2,}', r' ', modComm)
     
     print("step4", modComm)
     
@@ -86,7 +91,7 @@ def preproc1( comment , steps=range(1,11)):
     # step 7: remove stop words
     # does not work well if punctuation isn't split first
     if 7 in steps:
-        with open("/u/cs401/Wordlists/StopWords", "r") as file:
+        with open(stopWordPath, "r") as file:
             stop_words = file.read().split('\n')
 
         tokenList = modComm.split()
@@ -117,7 +122,7 @@ def preproc1( comment , steps=range(1,11)):
         for token in doc:
             if token.lemma_[0] != '-':
                 # the additional space mitigates accidentally replacing words embedded in one another
-                modComm = re.sub("(\s"+token.text+")(\s|/)", "\s"+token.lemma_+"\2", modComm)
+                modComm = re.sub(" "+token.text, " "+token.lemma_, modComm)
 
     print("step8", modComm)
 
@@ -125,13 +130,13 @@ def preproc1( comment , steps=range(1,11)):
     # requires punctuation step
     if 9 in steps:
         # deal with end of line characters within quotations
-        modComm = re.sub(r'([?!.]+\")', r'\1\n', mocComm)
+        modComm = re.sub(r'([?!.]+\")', r'\1\n', modComm)
 
         # deal with end of line characters without quotations
         modComm = re.sub(r'(\s[?!.]+\s")', r'\1\n', modComm)
 
         # remove any double spaces
-        modComm = re.sub('\s{2,}', r'\s', modComm)
+        modComm = re.sub('\s{2,}', r' ', modComm)
 
     print("step9", modComm)
     
@@ -139,7 +144,7 @@ def preproc1( comment , steps=range(1,11)):
     if 10 in steps:
         modComm = modComm.lower()
 
-    print("step6", modComm)
+    print("step10", modComm)
 
     return modComm
 
