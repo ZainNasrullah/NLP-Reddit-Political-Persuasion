@@ -7,7 +7,6 @@ import html
 import re
 import string
 
-
 import spacy
 
 indir = '/u/cs401/A1/data/';
