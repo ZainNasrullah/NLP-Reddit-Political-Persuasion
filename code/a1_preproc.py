@@ -11,10 +11,12 @@ import spacy
 
 indir = '/u/cs401/A1/data/';
 stopWordPath = '/u/cs401/Wordlists/abbrev.english';
-Windows = None
+abbrevWordPath = '/u/cs401/Wordlists/StopWords';
+Windows = 1
 
 if Windows:
-    stopWordPath = 'C:\\Users\\zainn\\nlp\\NLP-Reddit-Political-Persuasion\\StopWords'
+    stopWordPath = 'C:\\Users\\zainn\\nlp\\NLP-Reddit-Political-Persuasion\\Wordlists\\StopWords'
+    abbrevWordPath = 'C:\\Users\\zainn\\nlp\\NLP-Reddit-Political-Persuasion\\Wordlists\\abbrev.english'
 
 def preproc1( comment , steps=range(1,11)):
     ''' This function pre-processes a single comment
@@ -54,11 +56,11 @@ def preproc1( comment , steps=range(1,11)):
     if 4 in steps:
 
         # replace periods excluding abbreviations
-        with open(stopWordPath, "r") as file:
+        with open(abbrevWordPath, "r") as file:
             abbrevs = file.read().split('.\n')
         abbrevs_look = [r'(?<!\b' + a + r'\b)' for a in abbrevs]
         abbrevs_regex = ''.join(abbrevs_look[:-1])
-        modComm = re.sub(abbrevs_regex + "(\W?\.\W+)", r' \1 ', modComm)
+        modComm = re.sub(abbrevs_regex + "(\W?\.\W*)", r' \1 ', modComm)
 
         # replace all punctuation but periods, also handle special abbreviations like e.g.
         modComm = re.sub(r"\s?([^\w.\s'\-]+|(\w\.\w\.))\s?", r" \1 ", modComm)
@@ -117,34 +119,33 @@ def preproc1( comment , steps=range(1,11)):
             tokens = modComm.split()
             doc = spacy.tokens.Doc(nlp.vocab, words=tokens)
             doc = nlp.tagger(doc)
-        
+
         # replace every token by its lemma
         for token in doc:
             if token.lemma_[0] != '-':
                 # the additional space mitigates accidentally replacing words embedded in one another
-                modComm = re.sub(" "+token.text, " "+token.lemma_, modComm)
+                #modComm = re.sub(" "+token.text, " "+token.lemma_, modComm)
+                pass
 
-    print("step8", modComm)
+    print("step8", repr(modComm))
 
     # step 9: find end of lines and deal with abbreviations
     # requires punctuation step
     if 9 in steps:
-        # deal with end of line characters within quotations
-        modComm = re.sub(r'([?!.]+\")', r'\1\n', modComm)
 
-        # deal with end of line characters without quotations
-        modComm = re.sub(r'(\s[?!.]+\s")', r'\1\n', modComm)
+        # deal with end of line characters
+        modComm = re.sub(r'([?!.]+"?/\.)', r'\1\n', modComm)
 
         # remove any double spaces
-        modComm = re.sub('\s{2,}', r' ', modComm)
+        #modComm = re.sub('\s{2,}', r' ', modComm)
 
-    print("step9", modComm)
+    print("step9", repr(modComm))
     
     # convert text to lower case
     if 10 in steps:
         modComm = modComm.lower()
 
-    print("step10", modComm)
+    print("step10", repr(modComm))
 
     return modComm
 
@@ -189,7 +190,7 @@ def main( args ):
     fout.close()
 
 if __name__ == "__main__":
-
+    '''
     parser = argparse.ArgumentParser(description='Process each .')
     parser.add_argument('ID', metavar='N', type=int, nargs=1,
                         help='your student ID')
@@ -202,3 +203,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     main(args)
+    '''
+    preproc1('''Hello this is a test. How does it "work?" Dr. I don't know... you tell me.''')
