@@ -15,35 +15,35 @@ indir = '/u/cs401/A1/data/';
 def preproc1( comment , steps=range(1,11)):
     ''' This function pre-processes a single comment
 
-    Parameters:                                                                      
+    Parameters:
         comment : string, the body of a comment
-        steps   : list of ints, each entry in this list corresponds to a preprocessing step  
+        steps   : list of ints, each entry in this list corresponds to a preprocessing step
 
     Returns:
-        modComm : string, the modified comment 
+        modComm : string, the modified comment
     '''
-    
+
     modComm = comment
     nlp = spacy.load('en', disable=['parser', 'ner'])
 
     print(comment)
-    
+
     # step 1: simple string replacement of all new line characters by a blank
     if 1 in steps:
         modComm = modComm.replace('\n', '')
 
     print(modComm)
-    
+
     # step 2: convert all html tags to unicode using the html parser
     if 2 in steps:
         modComm = html.unescape(modComm)
-    
+
     # step 3: remove all urls starting with http or www using regular expressions
     if 3 in steps:
         modComm = re.sub(r'(http|www)\S+', '', modComm)
 
     print(modComm)
-    
+
     # step 4: add white space to around punctuation excluding apostrophe, multiple punctuation, and abbreviations
     if 4 in steps:
 
@@ -72,8 +72,6 @@ def preproc1( comment , steps=range(1,11)):
             else:
                 modComm = modComm.replace(p.group(0), p.group(1)[:-1] + ' ' + p.group(1)[-1] + p.group(2))
 
-        modComm = re.sub('\s{2,}', r'\s', modComm)
-
     print(modComm)
 
     # step 6: tokenize string and add tags
@@ -81,7 +79,7 @@ def preproc1( comment , steps=range(1,11)):
         tokens = modComm.split()
         doc = spacy.tokens.Doc(nlp.vocab, words=tokens)
         doc = nlp.tagger(doc)
-        
+
         modComm = ''
         # each punctuation treated as an independent token
         for token in doc:
@@ -89,7 +87,7 @@ def preproc1( comment , steps=range(1,11)):
         modComm = modComm[:-1]
 
     print(modComm)
-    
+
     # step 7: remove stop words
     if 7 in steps:
         with open("/u/cs401/Wordlists/StopWords", "r") as file:
@@ -105,8 +103,8 @@ def preproc1( comment , steps=range(1,11)):
         modComm = ' '.join(modList)
 
     print(modComm)
-    
-    # step 8: replace tokens with lemmas except if lemma starts with a dash 
+
+    # step 8: replace tokens with lemmas except if lemma starts with a dash
     if 8 in steps:
         utt = nlp(modComm)
         for token in utt:
@@ -117,14 +115,22 @@ def preproc1( comment , steps=range(1,11)):
 
     # step 9: find end of lines and deal with abbreviations
     if 9 in steps:
-        pass
-    
+        # deal with end of line characters within quotations
+        modComm = re.sub(r'([?!.]+\")', r'\1\n' )
+
+        # deal with end of line characters without quotations
+        modComm = re.sub(r'(\s[?!.]+\s")', r'\1\n' )
+
+        # remove any double spaces
+        modComm = re.sub('\s{2,}', r'\s', modComm)
+
+
     # convert text to lower case
     if 10 in steps:
         modComm = modComm.lower()
 
     input()
-        
+
     return modComm
 
 def main( args ):
@@ -144,13 +150,13 @@ def main( args ):
             #TODO: read those lines with something like `j = json.loads(line)`
             while max_iters < args.max:
                 j = json.loads(data[start])
-                
+
             # TODO: choose to retain fields from those lines that are relevant to you
                 k = {key:j[key] for key in ['id', 'body']}
 
-            # TODO: add a field to each selected line called 'cat' with the value of 'file' (e.g., 'Alt', 'Right', ...) 
+            # TODO: add a field to each selected line called 'cat' with the value of 'file' (e.g., 'Alt', 'Right', ...)
                 k['cat'] = file
-                
+
             # TODO: process the body field (j['body']) with preproc1(...) using default for `steps` argument
             # TODO: replace the 'body' field with the processed text
                 k['body'] = preproc1(k['body'])
