@@ -32,17 +32,19 @@ def preproc1( comment , steps=range(1,11)):
     if 1 in steps:
         modComm = modComm.replace('\n', '')
 
-    print(modComm)
+    print("step1", modComm)
 
     # step 2: convert all html tags to unicode using the html parser
     if 2 in steps:
         modComm = html.unescape(modComm)
-
+    
+    print("step2", modComm)
+    
     # step 3: remove all urls starting with http or www using regular expressions
     if 3 in steps:
         modComm = re.sub(r'(http|www)\S+', '', modComm)
 
-    print(modComm)
+    print("step3", modComm)
 
     # step 4: add white space to around punctuation excluding apostrophe, multiple punctuation, and abbreviations
     if 4 in steps:
@@ -51,28 +53,22 @@ def preproc1( comment , steps=range(1,11)):
         with open('/u/cs401/Wordlists/abbrev.english', "r") as file:
             abbrevs = file.read().split('.\n')
         abbrevs_look = [r'(?<!\b' + a + r'\b)' for a in abbrevs]
-        b = ''.join(abbrevs_look[:-1])
-        re.sub(b + "(\W?\.\W+)", r' \1 ', modComm)
+        abbrevs_regex = ''.join(abbrevs_look[:-1])
+        modComm = re.sub(abbrevs_regex + "(\W?\.\W+)", r' \1 ', modComm)
 
         # replace all punctuation but periods, also handle special abbreviations like e.g.
         modComm = re.sub(r"\s?([^\w.\s'\-]+|(\w\.\w\.))\s?", r" \1 ", modComm)
         modComm = re.sub('\s{2,}', r'\s', modComm)
-
+    
+    print("step4", modComm)
+    
     # TODO step 5: separate into clitics
     if 5 in steps:
-
+        
+        # deals with possessive (do I put they've here too)
         re.sub(r"(\w)('(\W|s))", r'\1 \2', modComm)
 
-        while re.search(r"(\w+)('\w*)", modComm):
-            p = re.search(r"(\w+)('\w*)", modComm)
-            if p.group(2) == "'":
-                pass
-            elif p.group(2) == "'s" or  len(p.group(1)) == 1:
-                modComm = modComm.replace(p.group(0), p.group(1) + ' ' + p.group(2))
-            else:
-                modComm = modComm.replace(p.group(0), p.group(1)[:-1] + ' ' + p.group(1)[-1] + p.group(2))
-
-    print(modComm)
+    print("step5", modComm)
 
     # step 6: tokenize string and add tags
     if 6 in steps:
@@ -86,9 +82,10 @@ def preproc1( comment , steps=range(1,11)):
             modComm += token.text + '/' + token.tag_ + ' '
         modComm = modComm[:-1]
 
-    print(modComm)
+    print("step6", modComm)
 
     # step 7: remove stop words
+    # does not work well if punctuation isn't split first
     if 7 in steps:
         with open("/u/cs401/Wordlists/StopWords", "r") as file:
             stop_words = file.read().split('\n')
@@ -96,40 +93,54 @@ def preproc1( comment , steps=range(1,11)):
         tokenList = modComm.split()
         modList = []
         for token in tokenList:
-            word_tag = token.split('/')
+            if '/' in token:
+                word_tag = token.split('/')
+            else:
+                word_tag = [token]
+             
             if word_tag[0].lower() not in stop_words:
                 modList.append(token)
 
         modComm = ' '.join(modList)
 
-    print(modComm)
+    print("step7", modComm)
 
     # step 8: replace tokens with lemmas except if lemma starts with a dash
     if 8 in steps:
-        utt = nlp(modComm)
-        for token in utt:
+        
+        # check to see if step 6 occurred; if not, create tokens
+        if 6 not in steps:
+            tokens = modComm.split()
+            doc = spacy.tokens.Doc(nlp.vocab, words=tokens)
+            doc = nlp.tagger(doc)
+        
+        # replace every token by its lemma
+        for token in doc:
             if token.lemma_[0] != '-':
-                modComm = modComm.replace(" "+token.text, " "+token.lemma_)
+                # the additional space mitigates accidentally replacing words embedded in one another
+                modComm = re.sub("(\s"+token.text+")(\s|/)", "\s"+token.lemma_+"\2", modComm)
 
-    print(modComm)
+    print("step8", modComm)
 
     # step 9: find end of lines and deal with abbreviations
+    # requires punctuation step
     if 9 in steps:
         # deal with end of line characters within quotations
-        modComm = re.sub(r'([?!.]+\")', r'\1\n' )
+        modComm = re.sub(r'([?!.]+\")', r'\1\n', mocComm)
 
         # deal with end of line characters without quotations
-        modComm = re.sub(r'(\s[?!.]+\s")', r'\1\n' )
+        modComm = re.sub(r'(\s[?!.]+\s")', r'\1\n', modComm)
 
         # remove any double spaces
         modComm = re.sub('\s{2,}', r'\s', modComm)
 
-
+    print("step9", modComm)
+    
     # convert text to lower case
     if 10 in steps:
         modComm = modComm.lower()
 
-    input()
+    print("step6", modComm)
 
     return modComm
 
