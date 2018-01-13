@@ -12,7 +12,8 @@ import spacy
 indir = '/u/cs401/A1/data/';
 stopWordPath = '/u/cs401/Wordlists/abbrev.english';
 abbrevWordPath = '/u/cs401/Wordlists/StopWords';
-Windows = 1
+Windows = True
+Metrics = True
 
 if Windows:
     stopWordPath = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\Wordlists\\StopWords'
@@ -32,25 +33,25 @@ def preproc1( comment , steps=range(1,11)):
     modComm = comment
     nlp = spacy.load('en', disable=['parser', 'ner'])
 
-    print(comment)
+    if Metrics: print(comment)
 
     # step 1: simple string replacement of all new line characters by a blank
     if 1 in steps:
         modComm = modComm.replace('\n', ' ')
 
-    print("step1", modComm)
+    if Metrics: print("step1", modComm)
 
     # step 2: convert all html tags to unicode using the html parser
     if 2 in steps:
         modComm = html.unescape(modComm)
 
-    print("step2", modComm)
+    if Metrics: print("step2", modComm)
 
     # step 3: remove all urls starting with http or www using regular expressions
     if 3 in steps:
         modComm = re.sub(r'(http|www)\S+', '', modComm)
 
-    print("step3", modComm)
+    if Metrics: print("step3", modComm)
 
     # step 4: add white space to around punctuation excluding apostrophe, multiple punctuation, and abbreviations
     if 4 in steps:
@@ -66,7 +67,7 @@ def preproc1( comment , steps=range(1,11)):
         modComm = re.sub(r"\s?([^\w.\s'\-]+|(\w\.\w\.))\s?", r" \1 ", modComm)
         modComm = re.sub('\s{2,}', r' ', modComm)
 
-    print("step4", modComm)
+    if Metrics: print("step4", modComm)
 
     # TODO step 5: separate into clitics
     if 5 in steps:
@@ -77,7 +78,7 @@ def preproc1( comment , steps=range(1,11)):
         # deal with the case where a letter prior to the ' needs to join the second term
         modComm = re.sub(r"(\w)('t)", r' \1\2', modComm)
 
-    print("step5", modComm)
+    if Metrics: print("step5", modComm)
 
     # step 6: tokenize string and add tags
     if 6 in steps:
@@ -91,7 +92,7 @@ def preproc1( comment , steps=range(1,11)):
             modComm += token.text + '/' + token.tag_ + ' '
         modComm = modComm[:-1]
 
-    print("step6", modComm)
+    if Metrics: print("step6", modComm)
 
     # step 7: remove stop words
     # does not work well if punctuation isn't split first
@@ -112,7 +113,7 @@ def preproc1( comment , steps=range(1,11)):
 
         modComm = ' '.join(modList)
 
-    print("step7", modComm)
+    if Metrics: print("step7", modComm)
 
     # step 8: replace tokens with lemmas except if lemma starts with a dash
     if 8 in steps:
@@ -132,7 +133,7 @@ def preproc1( comment , steps=range(1,11)):
                 # the additional space mitigates accidentally replacing words embedded in one another
                 modComm = modComm.replace(r" "+token.text, r" " + token.lemma_)
 
-    print("step8", modComm)
+    if Metrics: print("step8", modComm)
 
     # step 9: find end of lines and deal with abbreviations
     # requires punctuation and tagged text
@@ -150,13 +151,13 @@ def preproc1( comment , steps=range(1,11)):
             modComm = re.sub(abbrevs_regex + r'([?!.]+"?) ([A-Z])', r'\1\n\2', modComm)
 
 
-    print("step9", modComm)
+    if Metrics: print("step9", modComm)
 
     # convert text to lower case
     if 10 in steps:
         modComm = modComm.lower()
 
-    print("step10", repr(modComm))
+    if Metrics: print("step10", modComm)
 
     return modComm
 
