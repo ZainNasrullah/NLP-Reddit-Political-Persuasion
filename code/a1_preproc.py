@@ -12,7 +12,7 @@ import spacy
 indir = '/u/cs401/A1/data/';
 stopWordPath = '/u/cs401/Wordlists/abbrev.english';
 abbrevWordPath = '/u/cs401/Wordlists/StopWords';
-<<<<<<< HEAD
+
 Metrics = False
 
 # Open files outside of main functions for efficiency
@@ -27,7 +27,7 @@ abbrevs_regex = ''.join(abbrevs_look[:-1])
 with open(stopWordPath, "r") as file:
     stop_words = file.read().split('\n')
 
-Windows = True
+Windows = False
 if Windows:
     stopWordPath = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\Wordlists\\StopWords'
     abbrevWordPath = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\Wordlists\\abbrev.english'
