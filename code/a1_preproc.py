@@ -193,6 +193,7 @@ def main( args ):
 
             # TODO: append the result to 'allOutput'
                 allOutput.append(k)
+                print(max_iters)
 
                 max_iters += 1
                 start += 1
