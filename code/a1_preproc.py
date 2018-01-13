@@ -12,8 +12,8 @@ import spacy
 indir = '/u/cs401/A1/data/';
 stopWordPath = '/u/cs401/Wordlists/abbrev.english';
 abbrevWordPath = '/u/cs401/Wordlists/StopWords';
-Windows = True
-Metrics = True
+Windows = False
+Metrics = False
 
 if Windows:
     stopWordPath = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\Wordlists\\StopWords'
