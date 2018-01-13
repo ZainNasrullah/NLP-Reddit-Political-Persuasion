@@ -15,8 +15,8 @@ abbrevWordPath = '/u/cs401/Wordlists/StopWords';
 Windows = 1
 
 if Windows:
-    stopWordPath = 'C:\\Users\\zainn\\nlp\\NLP-Reddit-Political-Persuasion\\Wordlists\\StopWords'
-    abbrevWordPath = 'C:\\Users\\zainn\\nlp\\NLP-Reddit-Political-Persuasion\\Wordlists\\abbrev.english'
+    stopWordPath = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\Wordlists\\StopWords'
+    abbrevWordPath = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\Wordlists\\abbrev.english'
 
 def preproc1( comment , steps=range(1,11)):
     ''' This function pre-processes a single comment
@@ -43,9 +43,9 @@ def preproc1( comment , steps=range(1,11)):
     # step 2: convert all html tags to unicode using the html parser
     if 2 in steps:
         modComm = html.unescape(modComm)
-    
+
     print("step2", modComm)
-    
+
     # step 3: remove all urls starting with http or www using regular expressions
     if 3 in steps:
         modComm = re.sub(r'(http|www)\S+', '', modComm)
@@ -65,14 +65,17 @@ def preproc1( comment , steps=range(1,11)):
         # replace all punctuation but periods, also handle special abbreviations like e.g.
         modComm = re.sub(r"\s?([^\w.\s'\-]+|(\w\.\w\.))\s?", r" \1 ", modComm)
         modComm = re.sub('\s{2,}', r' ', modComm)
-    
+
     print("step4", modComm)
-    
+
     # TODO step 5: separate into clitics
     if 5 in steps:
-        
-        # deals with possessive (do I put they've here too)
-        re.sub(r"(\w)('(\W|s))", r'\1 \2', modComm)
+
+        # deals with possessives and common clitic forms
+        modComm = re.sub(r"(\w)('(\W|s|ve|re|m|ll))", r'\1 \2', modComm)
+
+        # deal with the case where a letter prior to the ' needs to join the second term
+        modComm = re.sub(r"(\w)('t)", r' \1\2', modComm)
 
     print("step5", modComm)
 
@@ -103,7 +106,7 @@ def preproc1( comment , steps=range(1,11)):
                 word_tag = token.split('/')
             else:
                 word_tag = [token]
-             
+
             if word_tag[0].lower() not in stop_words:
                 modList.append(token)
 
@@ -113,34 +116,42 @@ def preproc1( comment , steps=range(1,11)):
 
     # step 8: replace tokens with lemmas except if lemma starts with a dash
     if 8 in steps:
-        
+
         # check to see if step 6 occurred; if not, create tokens
         if 6 not in steps:
             tokens = modComm.split()
             doc = spacy.tokens.Doc(nlp.vocab, words=tokens)
             doc = nlp.tagger(doc)
 
+        # add trailing spaces before and after string
+        modComm = " " + modComm + " "
+
         # replace every token by its lemma
         for token in doc:
             if token.lemma_[0] != '-':
                 # the additional space mitigates accidentally replacing words embedded in one another
-                #modComm = re.sub(" "+token.text, " "+token.lemma_, modComm)
-                pass
+                modComm = modComm.replace(r" "+token.text, r" " + token.lemma_)
 
-    print("step8", repr(modComm))
+    print("step8", modComm)
 
     # step 9: find end of lines and deal with abbreviations
-    # requires punctuation step
+    # requires punctuation and tagged text
     if 9 in steps:
 
         # deal with end of line characters
         modComm = re.sub(r'([?!.]+"?/\.)', r'\1\n', modComm)
 
-        # remove any double spaces
-        #modComm = re.sub('\s{2,}', r' ', modComm)
+        if 4 not in steps:
+        # replace periods excluding abbreviations
+            with open(abbrevWordPath, "r") as file:
+                abbrevs = file.read().split('.\n')
+            abbrevs_look = [r'(?<!\b' + a + r'\b)' for a in abbrevs]
+            abbrevs_regex = ''.join(abbrevs_look[:-1])
+            modComm = re.sub(abbrevs_regex + r'([?!.]+"?) ([A-Z])', r'\1\n\2', modComm)
 
-    print("step9", repr(modComm))
-    
+
+    print("step9", modComm)
+
     # convert text to lower case
     if 10 in steps:
         modComm = modComm.lower()
@@ -190,7 +201,7 @@ def main( args ):
     fout.close()
 
 if __name__ == "__main__":
-    '''
+
     parser = argparse.ArgumentParser(description='Process each .')
     parser.add_argument('ID', metavar='N', type=int, nargs=1,
                         help='your student ID')
@@ -203,5 +214,4 @@ if __name__ == "__main__":
         sys.exit(1)
 
     main(args)
-    '''
-    preproc1('''Hello this is a test. How does it "work?" Dr. I don't know... you tell me.''')
+
