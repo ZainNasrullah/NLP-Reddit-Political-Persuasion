@@ -12,9 +12,22 @@ import spacy
 indir = '/u/cs401/A1/data/';
 stopWordPath = '/u/cs401/Wordlists/abbrev.english';
 abbrevWordPath = '/u/cs401/Wordlists/StopWords';
-Windows = False
+<<<<<<< HEAD
 Metrics = False
 
+# Open files outside of main functions for efficiency
+
+# abbreviations file
+with open(abbrevWordPath, "r") as file:
+    abbrevs = file.read().split('.\n')
+abbrevs_look = [r'(?<!\b' + a + r'\b)' for a in abbrevs]
+abbrevs_regex = ''.join(abbrevs_look[:-1])
+
+# stop words file
+with open(stopWordPath, "r") as file:
+    stop_words = file.read().split('\n')
+
+Windows = True
 if Windows:
     stopWordPath = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\Wordlists\\StopWords'
     abbrevWordPath = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\Wordlists\\abbrev.english'
@@ -56,11 +69,6 @@ def preproc1( comment , steps=range(1,11)):
     # step 4: add white space to around punctuation excluding apostrophe, multiple punctuation, and abbreviations
     if 4 in steps:
 
-        # replace periods excluding abbreviations
-        with open(abbrevWordPath, "r") as file:
-            abbrevs = file.read().split('.\n')
-        abbrevs_look = [r'(?<!\b' + a + r'\b)' for a in abbrevs]
-        abbrevs_regex = ''.join(abbrevs_look[:-1])
         modComm = re.sub(abbrevs_regex + "(\W?\.\W*)", r' \1 ', modComm)
 
         # replace all punctuation but periods, also handle special abbreviations like e.g.
@@ -97,8 +105,6 @@ def preproc1( comment , steps=range(1,11)):
     # step 7: remove stop words
     # does not work well if punctuation isn't split first
     if 7 in steps:
-        with open(stopWordPath, "r") as file:
-            stop_words = file.read().split('\n')
 
         tokenList = modComm.split()
         modList = []
@@ -144,10 +150,6 @@ def preproc1( comment , steps=range(1,11)):
 
         if 4 not in steps:
         # replace periods excluding abbreviations
-            with open(abbrevWordPath, "r") as file:
-                abbrevs = file.read().split('.\n')
-            abbrevs_look = [r'(?<!\b' + a + r'\b)' for a in abbrevs]
-            abbrevs_regex = ''.join(abbrevs_look[:-1])
             modComm = re.sub(abbrevs_regex + r'([?!.]+"?) ([A-Z])', r'\1\n\2', modComm)
 
 
