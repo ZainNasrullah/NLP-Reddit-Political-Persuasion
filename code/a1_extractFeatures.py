@@ -3,8 +3,27 @@ import sys
 import argparse
 import os
 import json
+import re
 
 featurePath = '/u/cs401/A1/feats/';
+slangPath = '/u/cs401/Wordlists/Slang';
+
+Windows = True
+if Windows:
+    slangPath = "G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\\Wordlists\\Slang"
+
+# define the pronouns
+firstPersonPronouns = ['i', 'me', 'my', 'mine', 'we', 'us', 'our', 'ours']
+secondPersonPronouns = ['you', 'your', 'yours', 'u', 'ur', 'urs']
+thirdPersonPronouns = ['he', 'him', 'his', 'she', 'her', 'hers', 'it', 'its', 'they', 'them', 'their', 'theirs']
+
+# define the slang
+with open(slangPath, "r") as file:
+    # load in the slang list and remove trailing whitespace
+    slangList = file.read().split('\n')
+    slangList = [slang for slang in slangList if slang]
+
+pronounTypes = [firstPersonPronouns, secondPersonPronouns, thirdPersonPronouns]
 
 def extract1( comment ):
     ''' This function extracts features from a single comment
@@ -15,8 +34,42 @@ def extract1( comment ):
     Returns:
         feats : numpy Array, a 173-length vector of floating point features
     '''
+
     print('TODO')
     # TODO: your code here
+    comment = ' ' + comment + ' '
+    feats = np.zeros(30)
+
+    # counting the pronouns
+    for i, pronounType in enumerate(pronounTypes):
+        for pronoun in pronounType:
+            feats[i] += len(re.findall(' '+pronoun+'/', comment))
+
+    # counting coordinating conjunctions, past-tense verbs and future-tense verbs
+    feats[3] = len(re.findall('/CC ', comment))
+    feats[4] = len(re.findall('/(VBD|VBN) ', comment))
+    feats[5] = 0
+
+    # counting commas and multi-character punctuation
+    feats[6] = len(re.findall(' ,/', comment))
+    feats[7] = len(re.findall(' \W{2,}/', comment))
+
+    # counting the nouns
+    feats[8] = len(re.findall('/(NN|NNS) ', comment))
+    feats[9] = len(re.findall('/(NNP|NNPS) ', comment))
+
+    # counting adverbs and wh- words
+    feats[10] = len(re.findall('/(RB|RBR|RBS) ', comment))
+    feats[11] = len(re.findall('/(WDT|WP|WP\$|WRB) ', comment))
+
+    # counting slang acronyms
+    for slangWord in slangList:
+        feats[12] += len(re.findall(' '+slangWord+'/', comment))
+
+    # Count the upper case
+    feats[9] = len(re.findall(' [A-Z]{3,}/', comment))
+
+
 
 def main( args ):
 

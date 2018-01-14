@@ -9,10 +9,19 @@ import string
 
 import spacy
 
+# File Paths
 indir = '/u/cs401/A1/data/';
 stopWordPath = '/u/cs401/Wordlists/abbrev.english';
 abbrevWordPath = '/u/cs401/Wordlists/StopWords';
 
+# For testing on my local machine
+Windows = True
+if Windows:
+    indir = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\\data\\';
+    stopWordPath = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\Wordlists\\StopWords'
+    abbrevWordPath = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\Wordlists\\abbrev.english'
+
+# Whether to print out metrics along steps
 Metrics = False
 
 # Open files outside of main functions for efficiency
@@ -27,10 +36,8 @@ abbrevs_regex = ''.join(abbrevs_look[:-1])
 with open(stopWordPath, "r") as file:
     stop_words = file.read().split('\n')
 
-Windows = False
-if Windows:
-    stopWordPath = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\Wordlists\\StopWords'
-    abbrevWordPath = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\Wordlists\\abbrev.english'
+# pre-load spacy
+nlp = spacy.load('en', disable=['parser', 'ner'])
 
 def preproc1( comment , steps=range(1,11)):
     ''' This function pre-processes a single comment
@@ -44,7 +51,6 @@ def preproc1( comment , steps=range(1,11)):
     '''
 
     modComm = comment
-    nlp = spacy.load('en', disable=['parser', 'ner'])
 
     if Metrics: print(comment)
 
@@ -61,8 +67,10 @@ def preproc1( comment , steps=range(1,11)):
     if Metrics: print("step2", modComm)
 
     # step 3: remove all urls starting with http or www using regular expressions
+    # somewhat deals with punctuation but not fully
     if 3 in steps:
-        modComm = re.sub(r'(http|www)\S+', '', modComm)
+        #modComm = re.sub(r'(http|www)\S+', '', modComm)
+        modComm = re.sub(r"(http|www)[a-zA-Z0-9/@.:?!=&%_;~#$'*+]+", '', modComm)
 
     if Metrics: print("step3", modComm)
 
