@@ -3,19 +3,26 @@ import sys
 import argparse
 import os
 import json
+
 import re
+import csv
 
 featurePath = '/u/cs401/A1/feats/';
 slangPath = '/u/cs401/Wordlists/Slang';
+bnglPath = '/u/cs401/Wordlists/BristolNorms+GilhoolyLogie.csv'
+warrPath = '/u/cs401/Wordlists/Ratings_Warriner_et_al.csv'
 
 Windows = True
 if Windows:
     slangPath = "G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\\Wordlists\\Slang"
+    bnglPath = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\\Wordlists\\BristolNorms+GilhoolyLogie.csv'
+    warrPath = "G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\\Wordlists\\Ratings_Warriner_et_al.csv"
 
 # define the pronouns
 firstPersonPronouns = ['i', 'me', 'my', 'mine', 'we', 'us', 'our', 'ours']
 secondPersonPronouns = ['you', 'your', 'yours', 'u', 'ur', 'urs']
 thirdPersonPronouns = ['he', 'him', 'his', 'she', 'her', 'hers', 'it', 'its', 'they', 'them', 'their', 'theirs']
+pronounTypes = [firstPersonPronouns, secondPersonPronouns, thirdPersonPronouns]
 
 # define the slang
 with open(slangPath, "r") as file:
@@ -23,7 +30,26 @@ with open(slangPath, "r") as file:
     slangList = file.read().split('\n')
     slangList = [slang for slang in slangList if slang]
 
-pronounTypes = [firstPersonPronouns, secondPersonPronouns, thirdPersonPronouns]
+# define bngl scores as two dimensional dictionary
+with open(bnglPath) as csvfile:
+    csvreader = csv.reader(csvfile)
+    bngl_scores = {}
+
+    next(csvreader) # skip header
+    for row in csvreader:
+        if row[1]: # avoid empty rows
+            bngl_scores[row[1]]={'AoA':float(row[3]),'IMG':float(row[4]),'FAM':float(row[5])}
+
+ # define warringer scores as two dimensional dictionary
+with open(warrPath) as csvfile:
+    csvreader = csv.reader(csvfile)
+    warr_scores = {}
+
+    next(csvreader) # skip header
+    for row in csvreader:
+        if row[1]: # avoid empty rows
+            warr_scores[row[1]]={'V':float(row[2]),'A':float(row[5]),'D':float(row[8])}
+
 
 def extract1( comment ):
     ''' This function extracts features from a single comment
@@ -32,17 +58,14 @@ def extract1( comment ):
         comment : string, the body of a comment (after preprocessing)
 
     Returns:
-        feats : numpy Array, a 173-length vector of floating point features
+        feats : numpy Array, a 29-length vector of floating point features
     '''
+    feats = np.zeros(29)
 
-    print('TODO')
-    # TODO: your code here
-
-    feats = np.zeros(30)
-
-    # Add trailing spaces to comment if they're not already there
+    # Add trailing spaces to comment if not already in place
     if comment[0] != ' ':
         comment = ' ' + comment
+
     if comment[-1] != ' ':
         comment = comment + ' '
 
@@ -97,6 +120,55 @@ def extract1( comment ):
     feats[15] = character_length / len(sentences)
     feats[16] = len(sentences)
 
+    # create lists to hold Bristol+GilhoolyLogie & Warringer scores
+    AoA = []
+    IMG = []
+    FAM = []
+
+    V = []
+    A = []
+    D = []
+
+    # split comment into tokens, find the words and check to see if they exist in the bngl dictionary. If exist, add their score to the corresponding list
+    comment_tokens = comment.split()
+    for token in comment_tokens:
+        text = re.search('(.*)/(.*)', token).group(1)
+
+        if text in bngl_scores.keys():
+            AoA.append(bngl_scores[text]['AoA'])
+            IMG.append(bngl_scores[text]['IMG'])
+            FAM.append(bngl_scores[text]['FAM'])
+
+        if text in warr_scores.keys():
+            V.append(warr_scores[text]['V'])
+            A.append(warr_scores[text]['A'])
+            D.append(warr_scores[text]['D'])
+
+    # convert lists to numpy arrays
+    AoAArray = np.array(AoA)
+    IMGArray = np.array(IMG)
+    FAMArray = np.array(FAM)
+
+    VArray = np.array(V)
+    AArray = np.array(A)
+    DArray = np.array(D)
+
+    # use numpy functions to find mean and standard deviations for scores
+    feats[17] = AoAArray.mean()
+    feats[18] = IMGArray.mean()
+    feats[19] = FAMArray.mean()
+    feats[20] = FAMArray.std()
+    feats[21] = IMGArray.std()
+    feats[22] = FAMArray.std()
+
+    feats[23] = VArray.mean()
+    feats[24] = AArray.mean()
+    feats[25] = DArray.mean()
+    feats[26] = VArray.std()
+    feats[27] = AArray.std()
+    feats[28] = DArray.std()
+
+    return feats
 
 
 def main( args ):
