@@ -12,7 +12,7 @@ slangPath = '/u/cs401/Wordlists/Slang';
 bnglPath = '/u/cs401/Wordlists/BristolNorms+GilhoolyLogie.csv'
 warrPath = '/u/cs401/Wordlists/Ratings_Warriner_et_al.csv'
 
-Windows = True
+Windows = False
 if Windows:
     slangPath = "G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\\Wordlists\\Slang"
     bnglPath = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\\Wordlists\\BristolNorms+GilhoolyLogie.csv'
@@ -207,6 +207,8 @@ def main( args ):
         # store the category
         feats[i, 173] = comment['cat']
 
+        print(feeats[i,:])
+        input()
 
     np.savez_compressed( args.output, feats)
 
