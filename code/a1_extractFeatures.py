@@ -37,8 +37,14 @@ def extract1( comment ):
 
     print('TODO')
     # TODO: your code here
-    comment = ' ' + comment + ' '
+
     feats = np.zeros(30)
+
+    # Add trailing spaces to comment if they're not already there
+    if comment[0] != ' ':
+        comment = ' ' + comment
+    if comment[-1] != ' ':
+        comment = comment + ' '
 
     # counting the pronouns
     for i, pronounType in enumerate(pronounTypes):
@@ -46,8 +52,8 @@ def extract1( comment ):
             feats[i] += len(re.findall(' '+pronoun+'/', comment))
 
     # counting coordinating conjunctions, past-tense verbs and future-tense verbs
-    feats[3] = len(re.findall('/CC ', comment))
-    feats[4] = len(re.findall('/(VBD|VBN) ', comment))
+    feats[3] = len(re.findall('/cc ', comment))
+    feats[4] = len(re.findall('/(vbd|vbn) ', comment))
     feats[5] = 0
 
     # counting commas and multi-character punctuation
@@ -55,19 +61,41 @@ def extract1( comment ):
     feats[7] = len(re.findall(' \W{2,}/', comment))
 
     # counting the nouns
-    feats[8] = len(re.findall('/(NN|NNS) ', comment))
-    feats[9] = len(re.findall('/(NNP|NNPS) ', comment))
+    feats[8] = len(re.findall('/(nn|nns) ', comment))
+    feats[9] = len(re.findall('/(nnp|nnps) ', comment))
 
     # counting adverbs and wh- words
-    feats[10] = len(re.findall('/(RB|RBR|RBS) ', comment))
-    feats[11] = len(re.findall('/(WDT|WP|WP\$|WRB) ', comment))
+    feats[10] = len(re.findall('/(rb|rbr|rbs) ', comment))
+    feats[11] = len(re.findall('/(wdt|wp|wp\$|wrb) ', comment))
 
     # counting slang acronyms
     for slangWord in slangList:
         feats[12] += len(re.findall(' '+slangWord+'/', comment))
 
     # Count the upper case
-    feats[9] = len(re.findall(' [A-Z]{3,}/', comment))
+    feats[13] = len(re.findall(' [A-Z]{3,}/', comment))
+
+    # Split all sentences on the new line character
+    sentences = re.findall('.*\n', comment)
+
+    # count total sentence lengths in tokens and characters
+    token_length = 0
+    character_length = 0
+    for sentence in sentences:
+
+        # track number of tokens
+        token_length += len(sentence.split())
+
+        # for each token, if its not punctuation, add only the chars
+        for token in sentence.split():
+            word_token = re.search('(.*)/([a-zA-Z])', token)
+            if word_token:
+                character_length += len(word_token.group(1))
+
+    # compute average sentence length in characters (excluding punctuation) and tokens
+    feats[14] = token_length / len(sentences)
+    feats[15] = character_length / len(sentences)
+    feats[16] = len(sentences)
 
 
 
