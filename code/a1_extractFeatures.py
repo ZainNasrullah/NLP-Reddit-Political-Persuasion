@@ -177,6 +177,8 @@ def main( args ):
     data = json.load(open(args.input))
     feats = np.zeros( (len(data), 173+1))
 
+    category={'Left':0, 'Center':1, 'Right':2, 'Alt':3}
+
     # TODO: Iterate through comments in JSON file
     prev_cat = ''
     for i, comment in enumerate(data):
@@ -191,7 +193,7 @@ def main( args ):
             # open the text file with category IDs
             idText = comment['cat'] + '_IDs.txt'
             with open(featurePath+idText, "r") as file:
-                idList = file.read().split('.\n')
+                idList = file.read().split('\n')
 
             # open the category numpy array
             idData = comment['cat'] + '_feats.dat.npy'
@@ -201,13 +203,12 @@ def main( args ):
         idIndex = idList.index(comment['id'])
 
         # capture the 144 features in the category array
-        startIndex = idIndex * 144
-        feats[i,29:173] = catArray[startIndex:(startIndex+144)]
+        feats[i,29:173] = catArray[idIndex, :]
 
         # store the category
-        feats[i, 173] = comment['cat']
+        feats[i, 173] = category[comment['cat']]
 
-        print(feeats[i,:])
+        print(feats[i,:], feats.shape)
         input()
 
     np.savez_compressed( args.output, feats)
