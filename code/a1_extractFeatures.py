@@ -100,6 +100,8 @@ def extract1( comment ):
 
     # Split all sentences on the new line character
     sentences = re.findall('.*\n', comment)
+    if not sentences:
+        sentences = [comment]
 
     # count total sentence lengths in tokens and characters
     token_length = 0
@@ -154,19 +156,21 @@ def extract1( comment ):
     DArray = np.array(D)
 
     # use numpy functions to find mean and standard deviations for scores
-    feats[17] = AoAArray.mean()
-    feats[18] = IMGArray.mean()
-    feats[19] = FAMArray.mean()
-    feats[20] = FAMArray.std()
-    feats[21] = IMGArray.std()
-    feats[22] = FAMArray.std()
+    if AoA:
+        feats[17] = AoAArray.mean()
+        feats[18] = IMGArray.mean()
+        feats[19] = FAMArray.mean()
+        feats[20] = FAMArray.std()
+        feats[21] = IMGArray.std()
+        feats[22] = FAMArray.std()
 
-    feats[23] = VArray.mean()
-    feats[24] = AArray.mean()
-    feats[25] = DArray.mean()
-    feats[26] = VArray.std()
-    feats[27] = AArray.std()
-    feats[28] = DArray.std()
+    if V:
+        feats[23] = VArray.mean()
+        feats[24] = AArray.mean()
+        feats[25] = DArray.mean()
+        feats[26] = VArray.std()
+        feats[27] = AArray.std()
+        feats[28] = DArray.std()
 
     return feats
 

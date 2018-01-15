@@ -153,11 +153,11 @@ def preproc1( comment , steps=range(1,11)):
     # requires punctuation and tagged text
     if 9 in steps:
 
-        # deal with end of line characters
+        # add end of line characters after end of line punctuation if string is tagged
         modComm = re.sub(r'([?!.]+"?/\.)', r'\1\n', modComm)
 
-        if 4 not in steps:
-        # replace periods excluding abbreviations
+        if 6 not in steps:
+        # add end of line characters after end of line punctuation if string is not tagged
             modComm = re.sub(abbrevs_regex + r'([?!.]+"?) ([A-Z])', r'\1\n\2', modComm)
 
 
