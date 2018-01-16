@@ -74,10 +74,12 @@ def extract1( comment ):
         for pronoun in pronounType:
             feats[i] += len(re.findall(' '+pronoun+'/', comment))
 
-    # counting coordinating conjunctions, past-tense verbs and future-tense verbs
+    # counting coordinating conjunctions and past-tense verbs
     feats[3] = len(re.findall('/cc ', comment))
     feats[4] = len(re.findall('/(vbd|vbn) ', comment))
-    feats[5] = 0
+
+    # dealing with future tense, I tried to include as many cases as I could think of including affirmative,negative, interrogative and combinations of these
+    feats[5] = len(re.findall("(will|shall|going|gonna|\'ll|won\'t)/\S+( (to|not|be|I|he|she|you|we|they|not)/\w+)* (\w+)/(vb|vbg|vbp) ", comment))
 
     # counting commas and multi-character punctuation
     feats[6] = len(re.findall(' ,/', comment))
@@ -99,9 +101,7 @@ def extract1( comment ):
     feats[13] = len(re.findall(' [A-Z]{3,}/', comment))
 
     # Split all sentences on the new line character
-    sentences = re.findall('.*\n', comment)
-    if not sentences:
-        sentences = [comment]
+    sentences = comment.split("\n")
 
     # count total sentence lengths in tokens and characters
     token_length = 0
