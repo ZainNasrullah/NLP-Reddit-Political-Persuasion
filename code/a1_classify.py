@@ -61,7 +61,7 @@ def class31(filename):
        i: int, the index of the supposed best classifier
     '''
     # load data; separate into features and target
-    data = np.load(filename)
+    data = np.load(filename)['arr_0']
     X = data[:,0:173]
     y = data[:, 173]
 
