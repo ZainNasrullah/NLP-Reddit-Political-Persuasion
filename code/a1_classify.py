@@ -69,6 +69,8 @@ def class31(filename):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
     scoreList = []
+    accBest = 0
+    iBest = None
     # iterate through models
     for i, model in enumerate(models):
 
@@ -77,12 +79,22 @@ def class31(filename):
       y_predict = model.predict(X_test)
       cm = confusion_matrix(y_test, y_predict)
 
-      # find various scores and append to list
+      # Apend the model number
       scores = []
       scores.append(i+1)
-      scores.append(accuracy(cm))
+
+      # Append accuracy and keep track of best
+      acc = accuracy(cm)
+      scores.append(acc)
+      if acc > accBest:
+        accBest = acc
+        iBest = i + 1
+
+      # extend the list with class scores for recall, precision
       scores.extend(recall(cm))
       scores.extend(precision(cm))
+
+      # extend the list with a flattened confusion matrix
       scores.extend(cm.flatten())
 
       # add to list of all models
