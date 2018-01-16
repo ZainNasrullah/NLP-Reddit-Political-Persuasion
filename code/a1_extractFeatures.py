@@ -211,9 +211,12 @@ def main( args ):
 
         # store the category
         feats[i, 173] = category[comment['cat']]
+        
+        if i % 1000 == 0:
+            print(i)
 
-        print(feats[i,:], feats.shape)
-        input()
+        #print(comment['body'],feats[i,:])
+        #input()
 
     np.savez_compressed( args.output, feats)
 
