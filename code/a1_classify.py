@@ -74,37 +74,36 @@ def class31(filename):
     # iterate through models
     for i, model in enumerate(models):
 
-      # fit data and then find the confusion matrix
-      model.fit(X_train, y_train)
-      y_predict = model.predict(X_test)
-      cm = confusion_matrix(y_test, y_predict)
+        # fit data and then find the confusion matrix
+        model.fit(X_train, y_train)
+        y_predict = model.predict(X_test)
+        cm = confusion_matrix(y_test, y_predict)
 
-      # Apend the model number
-      scores = []
-      scores.append(i+1)
+        # Apend the model number
+        scores = []
+        scores.append(i+1)
 
-      # Append accuracy and keep track of best
-      acc = accuracy(cm)
-      scores.append(acc)
-      if acc > accBest:
+        # Append accuracy and keep track of best
+        acc = accuracy(cm)
+        scores.append(acc)
+        if acc > accBest:
         accBest = acc
         iBest = i + 1
 
-      # extend the list with class scores for recall, precision
-      scores.extend(recall(cm))
-      scores.extend(precision(cm))
+        # extend the list with class scores for recall, precision
+        scores.extend(recall(cm))
+        scores.extend(precision(cm))
 
-      # extend the list with a flattened confusion matrix
-      scores.extend(cm.flatten())
+        # extend the list with a flattened confusion matrix
+        scores.extend(cm.flatten())
 
-      # add to list of all models
-      scoreList.append(scores)
-
+        # add to list of all models
+        scoreList.append(scores)
 
     # write list of scores for each model to csv
     with open('a1_3.1.csv', 'w') as file:
-      writer = csv.writer(file)
-      writer.writerows(scoreList)
+        writer = csv.writer(file)
+        writer.writerows(scoreList)
 
     return (X_train, X_test, y_train, y_test,iBest)
 
@@ -123,7 +122,32 @@ def class32(X_train, X_test, y_train, y_test,iBest):
        X_1k: numPy array, just 1K rows of X_train
        y_1k: numPy array, just 1K rows of y_train
    '''
-    print('TODO Section 3.2')
+
+   # load best model from Q1 and create empty list to store accuracies
+    model = models[iBest - 1]
+    accuracyList = []
+
+   # iterate through each sample length
+    lengths = [1000, 5000, 10000, 15000, 20000]
+    for l in lengths:
+
+        # generate a random list of indices of size l in range (0, train size)
+        idx = np.random.choice(a=X_train.shape[0], size = l)
+
+        # create random samples using those indices
+        X_sample = X_train[idx]
+        y_sample = X_test[idx]
+
+        # fit model on the sample, predict on the test set and store accuracy
+        model.fit(X_sample, y_sample)
+        y_predict = model.predict(X_test)
+        cm = confusion_matrix(y_test, y_predict)
+        accuracyList.append(accuracy(cm))
+
+    # write accuracies to csv file
+    with open('a1_3.2.csv', 'w') as file:
+        writer = csv.writer(file)
+        writer.writerows([accuracyList])
 
     return (X_1k, y_1k)
 
@@ -156,3 +180,4 @@ if __name__ == "__main__":
 
     # TODO : complete each classification experiment, in sequence.
     X_train, X_test, y_train, y_test,iBest = class31(args.input)
+    X_1k, y_1k = class32(X_train, X_test, y_train, y_test,iBest)
