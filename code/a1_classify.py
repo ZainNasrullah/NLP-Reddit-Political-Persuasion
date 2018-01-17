@@ -310,8 +310,8 @@ if __name__ == "__main__":
 
     # TODO : complete each classification experiment, in sequence.
     print("Starting Step 1:")
-    #X_train, X_test, y_train, y_test,iBest = class31(args.input)
-    X_train, X_test, y_train, y_test,iBest = get_data(args.input)
+    X_train, X_test, y_train, y_test,iBest = class31(args.input)
+    #X_train, X_test, y_train, y_test,iBest = get_data(args.input)
 
     print("Starting Step 2:")
     X_1k, y_1k = class32(X_train, X_test, y_train, y_test,iBest)
