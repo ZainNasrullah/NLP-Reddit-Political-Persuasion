@@ -298,7 +298,7 @@ def class34( filename, i ):
 
     # write out all results to a csv file
     acc_across_models.append(p_values)
-    with open('a1_3.3.csv', 'w') as file:
+    with open('a1_3.4.csv', 'w') as file:
         writer = csv.writer(file)
         writer.writerows(acc_across_models)
 
