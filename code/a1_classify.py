@@ -2,6 +2,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
 from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import KFold
+from scipy import stats
+
 import numpy as np
 import argparse
 import sys
@@ -163,7 +166,61 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
        X_1k: numPy array, just 1K rows of X_train (from task 3.2)
        y_1k: numPy array, just 1K rows of y_train (from task 3.2)
     '''
-    print('TODO Section 3.3')
+    model = models[i-1]
+    stored_values = []
+
+    for k in [5, 10, 20, 30, 40, 50]:
+        # keep track of which k we're on
+        pp = [k]
+
+        # create selector object
+        selector= SelectKBest(chi2, k)
+
+        # fit selector on 1K training data and print indices of top k features
+        selector.fit(X_1K, y_1k)
+        idx = selector.pvalues_.argsort()[-k:][::-1]
+        print("size= 1K, k=", k, ":", idx)
+
+        # when k is 5, fit using best model and evaluate
+        if k == 5:
+            # transform train data and fit model
+            Xk_1K = selector.transform(X_1K, y_1k)
+            model.fit(Xk_1K, y_1k)
+
+            # transform test data and predict
+            y_predict = model.predict(selector.transform(X_test))
+            cm = confusion_matrix(y_test, y_predict)
+            acc_1K = accuracy(cm)
+
+        # fit selector on 32K training data and print indices of top k features
+        selector.fit(X_train, y_train)
+        idx = selector.pvalues_.argsort()[-k:][::-1]
+        print("size= 32K, k=", k, ":", idx)
+        print()
+
+        # store top k p-values for the 32k database
+        pp.extend(selector.pvalues_[idx])
+        stored_values.append(pp)
+
+        # when k is 5, fit using best model and evaluate
+        if k == 5:
+            # transform train data and fit model
+            Xk_32K = selector.transform(X_train, y_train)
+            model.fit(Xk_32K, y_train)
+
+            # transform test data and predict
+            y_predict = model.predict(selector.transform(X_test))
+            cm = confusion_matrix(y_test, y_predict)
+            acc_32K = accuracy(cm)
+
+    # finalize the list for writing to csv
+    stored_values.append([acc1K, acc32K])
+
+    # write to csv
+    with open('a1_3.3.csv', 'w') as file:
+        writer = csv.writer(file)
+        writer.writerows(stored_values)
+
 
 def class34( filename, i ):
     ''' This function performs experiment 3.4
@@ -172,7 +229,62 @@ def class34( filename, i ):
        filename : string, the name of the npz file from Task 2
        i: int, the index of the supposed best classifier (from task 3.1)
         '''
-    print('TODO Section 3.4')
+    # load data; separate into features and target
+    data = np.load(filename)['arr_0']
+    X = data[:,0:173]
+    y = data[:, 173]
+
+    # create KFold object with shuffle and 5 splits
+    kf = KFold(n_splits=5, shuffle=True)
+
+    # Iterate across each model
+    acc_across_models =[]
+    for model in models:
+
+        # list to hold accuracy across folds
+        acc_across_folds=[]
+
+        # iterate across folds
+        for train_idx, test_idx in kf.split(X):
+
+            # create train and test data for this fold
+            X_train, X_test = X[train_idx], X[test_idx]
+            y_train, y_test = y[train_idx], y[test_idx]
+
+            # fit model on training data and test on test data
+            model.fit(X_train, X_test)
+            y_predict = model.predict(X_test)
+            cm = confusion_matrix(y_test, y_predict)
+
+            # store accuracy for this fold
+            acc_across_folds.append(accuracy(cm))
+
+        # store accuracies for model across folds
+        acc_across_models.append(acc_across_folds)
+
+    # identify best classifier and its scores
+    best_model_scores = acc_across_models[i-1]
+
+    # create list to hold p values
+    p_values=[]
+
+    # iterate through saved scores
+    for scores in acc_across_models:
+
+        # save p-values comparing other scores to the best model scores
+        if scores is not best_model_scores:
+            p_values.append(stats.ttest_rel(best_model_scores,scores)[1])
+
+    # write out all results to a csv file
+    acc_across_models.append(p_values)
+    with open('a1_3.3.csv', 'w') as file:
+        writer = csv.writer(file)
+        writer.writerows(acc_across_models)
+
+
+
+
+
 
 if __name__ == "__main__":
     parser.add_argument("-i", "--input", help="the input npz file from Task 2", required=True)
@@ -181,3 +293,5 @@ if __name__ == "__main__":
     # TODO : complete each classification experiment, in sequence.
     X_train, X_test, y_train, y_test,iBest = class31(args.input)
     X_1k, y_1k = class32(X_train, X_test, y_train, y_test,iBest)
+    class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k)
+
