@@ -49,6 +49,18 @@ def precision( C ):
     # sum across the rows to get denminator for each class
     return np.diag(C) / C.sum(axis=0)
 
+def get_data(filename):
+    '''Helper function for when I want to test without running class31'''
+
+    # load data; separate into features and target
+    data = np.load(filename)['arr_0']
+    X = data[:,0:173]
+    y = data[:, 173]
+
+    # split into 80/20 train-test
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+    iBest = 3
+    return (X_train, X_test, y_train, y_test,iBest)
 
 def class31(filename):
     ''' This function performs experiment 3.1
@@ -140,7 +152,11 @@ def class32(X_train, X_test, y_train, y_test,iBest):
 
         # create random samples using those indices
         X_sample = X_train[idx]
-        y_sample = X_test[idx]
+        y_sample = y_train[idx]
+
+        if l == 1000:
+            X_1k = X_sample
+            y_1k = y_sample
 
         # fit model on the sample, predict on the test set and store accuracy
         model.fit(X_sample, y_sample)
@@ -179,15 +195,16 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
         selector= SelectKBest(chi2, k)
 
         # fit selector on 1K training data and print indices of top k features
-        selector.fit(X_1K, y_1k)
+        print(X_1k, X_1k.shape)
+        selector.fit(X_1k, y_1k)
         idx = selector.pvalues_.argsort()[:k]
         print("size= 1K, k=", k, ":", idx)
 
         # when k is 5, fit using best model and evaluate
         if k == 5:
             # transform train data and fit model
-            Xk_1K = selector.transform(X_1K, y_1k)
-            model.fit(Xk_1K, y_1k)
+            Xk_1k = selector.transform(X_1k, y_1k)
+            model.fit(Xk_1k, y_1k)
 
             # transform test data and predict
             y_predict = model.predict(selector.transform(X_test))
@@ -255,7 +272,7 @@ def class34( filename, i ):
             y_train, y_test = y[train_idx], y[test_idx]
 
             # fit model on training data and test on test data
-            model.fit(X_train, X_test)
+            model.fit(X_train, y_train)
             y_predict = model.predict(X_test)
             cm = confusion_matrix(y_test, y_predict)
 
@@ -293,13 +310,14 @@ if __name__ == "__main__":
 
     # TODO : complete each classification experiment, in sequence.
     print("Starting Step 1:")
-    X_train, X_test, y_train, y_test,iBest = class31(args.input)
+    #X_train, X_test, y_train, y_test,iBest = class31(args.input)
+    X_train, X_test, y_train, y_test,iBest = get_data(args.input)
 
     print("Starting Step 2:")
     X_1k, y_1k = class32(X_train, X_test, y_train, y_test,iBest)
 
     print("Starting Step 3:")
-    class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k)
+    class33(X_train, X_test, y_train, y_test, iBest, X_1k, y_1k)
 
     print("Starting Step 4:")
     class34(args.input, iBest)
