@@ -167,18 +167,18 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
        y_1k: numPy array, just 1K rows of y_train (from task 3.2)
     '''
     model = models[i-1]
-    stored_values = []
+    values_for_csv = []
 
     for k in [5, 10, 20, 30, 40, 50]:
         # keep track of which k we're on
-        pp = [k]
+        p_vals = [k]
 
         # create selector object
         selector= SelectKBest(chi2, k)
 
         # fit selector on 1K training data and print indices of top k features
         selector.fit(X_1K, y_1k)
-        idx = selector.pvalues_.argsort()[-k:][::-1]
+        idx = selector.pvalues_.argsort()[:k]
         print("size= 1K, k=", k, ":", idx)
 
         # when k is 5, fit using best model and evaluate
@@ -194,13 +194,13 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
 
         # fit selector on 32K training data and print indices of top k features
         selector.fit(X_train, y_train)
-        idx = selector.pvalues_.argsort()[-k:][::-1]
+        idx = selector.pvalues_.argsort()[:k]
         print("size= 32K, k=", k, ":", idx)
         print()
 
-        # store top k p-values for the 32k database
-        pp.extend(selector.pvalues_[idx])
-        stored_values.append(pp)
+        # store smallest k p-values for the 32k database
+        p_vals.extend(selector.pvalues_[idx])
+        values_for_csv.ap_valsend(p_vals)
 
         # when k is 5, fit using best model and evaluate
         if k == 5:
@@ -214,12 +214,12 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
             acc_32K = accuracy(cm)
 
     # finalize the list for writing to csv
-    stored_values.append([acc1K, acc32K])
+    values_for_csv.append([acc1K, acc32K])
 
     # write to csv
     with open('a1_3.3.csv', 'w') as file:
         writer = csv.writer(file)
-        writer.writerows(stored_values)
+        writer.writerows(values_for_csv)
 
 
 def class34( filename, i ):
@@ -229,6 +229,7 @@ def class34( filename, i ):
        filename : string, the name of the npz file from Task 2
        i: int, the index of the supposed best classifier (from task 3.1)
         '''
+
     # load data; separate into features and target
     data = np.load(filename)['arr_0']
     X = data[:,0:173]
@@ -282,10 +283,6 @@ def class34( filename, i ):
         writer.writerows(acc_across_models)
 
 
-
-
-
-
 if __name__ == "__main__":
     parser.add_argument("-i", "--input", help="the input npz file from Task 2", required=True)
     args = parser.parse_args()
@@ -294,4 +291,4 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test,iBest = class31(args.input)
     X_1k, y_1k = class32(X_train, X_test, y_train, y_test,iBest)
     class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k)
-
+    class34(args.input, iBest)
