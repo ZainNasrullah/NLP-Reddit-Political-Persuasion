@@ -24,7 +24,8 @@ mlp = MLPClassifier(alpha=0.05)
 adaboost = AdaBoostClassifier()
 
 # create list to easily call them by index
-models = [svcLinear, svcRBF, rf, mlp, adaboost]
+models = [svcLinear,svcRBF,rf, mlp, adaboost]
+#models = [rf, mlp, adaboost]
 
 
 def accuracy( C ):
@@ -117,10 +118,11 @@ def class31(filename):
         print("Model", i+1,"done.")
 
     # write list of scores for each model to csv
-    with open('a1_3.1.csv', 'w') as file:
+    with open('a1_3.1.csv', 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerows(scoreList)
 
+    print("Best Model:", iBest)
     return (X_train, X_test, y_train, y_test,iBest)
 
 
@@ -166,7 +168,7 @@ def class32(X_train, X_test, y_train, y_test,iBest):
         print("Length", l, "done.")
 
     # write accuracies to csv file
-    with open('a1_3.2.csv', 'w') as file:
+    with open('a1_3.2.csv', 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerows([accuracyList])
 
@@ -236,7 +238,7 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
     values_for_csv.append([acc1K, acc32K])
 
     # write to csv
-    with open('a1_3.3.csv', 'w') as file:
+    with open('a1_3.3.csv', 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerows(values_for_csv)
 
@@ -259,7 +261,7 @@ def class34( filename, i ):
 
     # Iterate across each model
     acc_across_models =[]
-    for model in models:
+    for k, model in enumerate(models):
 
         # list to hold accuracy across folds
         acc_across_folds=[]
@@ -281,7 +283,7 @@ def class34( filename, i ):
 
         # store accuracies for model across folds
         acc_across_models.append(acc_across_folds)
-        print("Model", i+1, "done.")
+        print("Model", k+1, "done.")
 
     # identify best classifier and its scores
     best_model_scores = acc_across_models[i-1]
@@ -298,7 +300,7 @@ def class34( filename, i ):
 
     # write out all results to a csv file
     acc_across_models.append(p_values)
-    with open('a1_3.4.csv', 'w') as file:
+    with open('a1_3.4.csv', 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerows(acc_across_models)
 
@@ -313,13 +315,13 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test,iBest = class31(args.input)
     #X_train, X_test, y_train, y_test,iBest = get_data(args.input)
 
-    print("Starting Step 2:")
+    print("\nStarting Step 2:")
     X_1k, y_1k = class32(X_train, X_test, y_train, y_test,iBest)
 
-    print("Starting Step 3:")
+    print("\nStarting Step 3:")
     class33(X_train, X_test, y_train, y_test, iBest, X_1k, y_1k)
 
-    print("Starting Step 4:")
+    print("\nStarting Step 4:")
     class34(args.input, iBest)
 
-    print("Complete.")
+    print("\nComplete.")
