@@ -90,8 +90,8 @@ def class31(filename):
         acc = accuracy(cm)
         scores.append(acc)
         if acc > accBest:
-        accBest = acc
-        iBest = i + 1
+            accBest = acc
+            iBest = i + 1
 
         # extend the list with class scores for recall, precision
         scores.extend(recall(cm))
@@ -102,6 +102,7 @@ def class31(filename):
 
         # add to list of all models
         scoreList.append(scores)
+        print("Model", i+1,"done.")
 
     # write list of scores for each model to csv
     with open('a1_3.1.csv', 'w') as file:
@@ -146,6 +147,7 @@ def class32(X_train, X_test, y_train, y_test,iBest):
         y_predict = model.predict(X_test)
         cm = confusion_matrix(y_test, y_predict)
         accuracyList.append(accuracy(cm))
+        print("Length", l, "done.")
 
     # write accuracies to csv file
     with open('a1_3.2.csv', 'w') as file:
@@ -262,6 +264,7 @@ def class34( filename, i ):
 
         # store accuracies for model across folds
         acc_across_models.append(acc_across_folds)
+        print("Model", i+1, "done.")
 
     # identify best classifier and its scores
     best_model_scores = acc_across_models[i-1]
@@ -284,11 +287,21 @@ def class34( filename, i ):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Classify each .')
     parser.add_argument("-i", "--input", help="the input npz file from Task 2", required=True)
     args = parser.parse_args()
 
     # TODO : complete each classification experiment, in sequence.
+    print("Starting Step 1:")
     X_train, X_test, y_train, y_test,iBest = class31(args.input)
+
+    print("Starting Step 2:")
     X_1k, y_1k = class32(X_train, X_test, y_train, y_test,iBest)
+
+    print("Starting Step 3:")
     class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k)
+
+    print("Starting Step 4:")
     class34(args.input, iBest)
+
+    print("Complete.")
