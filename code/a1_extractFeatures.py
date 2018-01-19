@@ -211,7 +211,7 @@ def main( args ):
 
         # store the category
         feats[i, 173] = category[comment['cat']]
-        
+
         if i % 1000 == 0:
             print(i)
 

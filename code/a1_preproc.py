@@ -15,7 +15,7 @@ stopWordPath = '/u/cs401/Wordlists/abbrev.english';
 abbrevWordPath = '/u/cs401/Wordlists/StopWords';
 
 # For testing on my local machine
-Windows = True
+Windows = False
 if Windows:
     indir = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\\data\\';
     stopWordPath = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\Wordlists\\StopWords'
@@ -67,6 +67,8 @@ def preproc1( comment , steps=range(1,11)):
 
     # step 4: add white space to around punctuation w/ exceptions
     if 4 in steps:
+
+        # excluding abbreviations, add white space before and after periods
         modComm = re.sub(abbrevs_regex + "(\W?\.\W*)", r' \1 ', modComm)
 
         # replace all punctuation but periods, also handle special abbreviations like e.g.
