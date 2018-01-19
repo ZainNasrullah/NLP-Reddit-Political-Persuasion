@@ -146,7 +146,9 @@ def preproc1( comment , steps=range(1,11)):
 
         if 6 not in steps:
         # add end of line characters after end of line punctuation if string is not tagged
-            modComm = re.sub(abbrevs_regex + r'([?!.]+"?) ([A-Z])', r'\1\n\2', modComm)
+        # haven't extensively tested this functionality as in the general case step 6 will be done. 
+            modComm = re.sub(abbrevs_regex + r'([?!]+"?) ([A-Z])', r'\1\n\2', modComm)
+            modComm = re.sub(abbrevs_regex + r'([.]"?) ([A-Z])', r'\1\n\2', modComm)
 
 
     # convert text to lower case
