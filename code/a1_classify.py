@@ -1,6 +1,6 @@
 from sklearn.model_selection import train_test_split
 from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import chi2
+from sklearn.feature_selection import chi2, f_classif
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import KFold
 from scipy import stats
@@ -24,8 +24,8 @@ mlp = MLPClassifier(alpha=0.05)
 adaboost = AdaBoostClassifier()
 
 # create list to easily call them by index
-models = [svcLinear,svcRBF,rf, mlp, adaboost]
-#models = [rf, mlp, adaboost]
+#models = [svcLinear,svcRBF,rf, mlp, adaboost]
+models = [rf, mlp, adaboost]
 
 
 def accuracy( C ):
@@ -194,18 +194,17 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
         p_vals = [k]
 
         # create selector object
-        selector= SelectKBest(chi2, k)
+        selector= SelectKBest(f_classif, k)
 
         # fit selector on 1K training data and print indices of top k features
-        print(X_1k, X_1k.shape)
         selector.fit(X_1k, y_1k)
-        idx = selector.pvalues_.argsort()[:k]
-        print("size= 1K, k=", k, ":", idx)
+        idx_1K = selector.pvalues_.argsort()[:k]
+        print("size= 1K, k=", k, ":", idx_1K)
 
         # when k is 5, fit using best model and evaluate
         if k == 5:
             # transform train data and fit model
-            Xk_1k = selector.transform(X_1k, y_1k)
+            Xk_1k = selector.transform(X_1k)
             model.fit(Xk_1k, y_1k)
 
             # transform test data and predict
@@ -215,18 +214,19 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
 
         # fit selector on 32K training data and print indices of top k features
         selector.fit(X_train, y_train)
-        idx = selector.pvalues_.argsort()[:k]
-        print("size= 32K, k=", k, ":", idx)
+        idx_32K = selector.pvalues_.argsort()[:k]
+        print("size= 32K, k=", k, ":", idx_32K)
+        print("Common Values:", set(idx_1K) & set(idx_32K))
         print()
 
         # store smallest k p-values for the 32k database
-        p_vals.extend(selector.pvalues_[idx])
-        values_for_csv.ap_valsend(p_vals)
+        p_vals.extend(selector.pvalues_[idx_32K])
+        values_for_csv.append(p_vals)
 
         # when k is 5, fit using best model and evaluate
         if k == 5:
             # transform train data and fit model
-            Xk_32K = selector.transform(X_train, y_train)
+            Xk_32K = selector.transform(X_train)
             model.fit(Xk_32K, y_train)
 
             # transform test data and predict
@@ -234,8 +234,8 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
             cm = confusion_matrix(y_test, y_predict)
             acc_32K = accuracy(cm)
 
-    # finalize the list for writing to csv
-    values_for_csv.append([acc1K, acc32K])
+    # finalize the list for writing to csv by adding accuracies
+    values_for_csv.append([acc_1K, acc_32K])
 
     # write to csv
     with open('a1_3.3.csv', 'w', newline='') as file:
