@@ -11,22 +11,20 @@ import sys
 import os
 import csv
 
-from sklearn.svm import SVC
+from sklearn.svm import SVC, LinearSVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import AdaBoostClassifier
 
 # create models with specified hyperparameters
-svcLinear = SVC(kernel='linear')
+svcLinear = LinearSVC()
 svcRBF = SVC(kernel='rbf')
 rf = RandomForestClassifier(n_estimators=10, max_depth=5)
 mlp = MLPClassifier(alpha=0.05)
 adaboost = AdaBoostClassifier()
 
 # create list to easily call them by index
-#models = [svcLinear,svcRBF,rf, mlp, adaboost]
-models = [rf, mlp, adaboost]
-
+models = [svcLinear,svcRBF,rf, mlp, adaboost]
 
 def accuracy( C ):
     ''' Compute accuracy given Numpy array confusion matrix C. Returns a floating point value '''
