@@ -24,7 +24,7 @@ if Windows:
 
 # Open files outside of main functions for efficiency
 
-# abbreviations file
+# open abbreviations file and create a special regex for look-behind
 with open(abbrevWordPath, "r") as file:
     abbrevs = file.read().split('.\n')
 abbrevs_look = [r'(?<!\b' + a + r'\b)' for a in abbrevs]
