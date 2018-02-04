@@ -1,0 +1,7 @@
+0.30375,0.34075,0.338375,0.3005,0.313375
+0.326375,0.326625,0.313625,0.325125,0.32175
+0.371125,0.370125,0.370375,0.37175,0.371875
+0.338,0.38575,0.33875,0.374,0.35725
+0.401625,0.398,0.397625,0.404,0.407125
+0.00116666954955,7.2743248686e-06,3.10538645259e-05,0.0110219407844
+The best model (AdaBoost) is shown to be significantly better than all other models within a confidence level of 5%. This is probably because each score across folds in the best classifier exceeds that of every other classifier by a fair margin. In particular, models with low standard deviation across folds received very low p-values (less than 1%) since the test is more confident in their scores and thus the signifcance between models. Models with higher variability received relatively higher p-values (though still low) as there is more uncertainty associated with them.

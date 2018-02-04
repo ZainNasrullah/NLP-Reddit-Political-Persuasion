@@ -24,15 +24,17 @@ mlp = MLPClassifier(alpha=0.05)
 adaboost = AdaBoostClassifier()
 
 # create list to easily call them by index
-models = [svcLinear,svcRBF,rf, mlp, adaboost]
+models = [svcLinear, svcRBF, rf, mlp, adaboost]
 
-def accuracy( C ):
+
+def accuracy(C):
     ''' Compute accuracy given Numpy array confusion matrix C. Returns a floating point value '''
 
     # return the sum of the diagonal entries divided by the sum of the flattened entire flattened 2D array
     return sum(np.diag(C)) / np.sum(C)
 
-def recall( C ):
+
+def recall(C):
     ''' Compute recall given Numpy array confusion matrix C. Returns a list of floating point values '''
 
     # TP / (TP+FN)
@@ -40,7 +42,8 @@ def recall( C ):
     # sum across the cols to get denominator for each class
     return np.diag(C) / C.sum(axis=1)
 
-def precision( C ):
+
+def precision(C):
     ''' Compute precision given Numpy array confusion matrix C. Returns a list of floating point values '''
 
     # TP / (TP+FP)
@@ -48,18 +51,20 @@ def precision( C ):
     # sum across the rows to get denminator for each class
     return np.diag(C) / C.sum(axis=0)
 
+
 def get_data(filename):
     '''Helper function for when I want to test without running class31'''
 
     # load data; separate into features and target
     data = np.load(filename)['arr_0']
-    X = data[:,0:173]
+    X = data[:, 0:173]
     y = data[:, 173]
 
     # split into 80/20 train-test
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
     iBest = 3
-    return (X_train, X_test, y_train, y_test,iBest)
+    return (X_train, X_test, y_train, y_test, iBest)
+
 
 def class31(filename):
     ''' This function performs experiment 3.1
@@ -76,7 +81,7 @@ def class31(filename):
     '''
     # load data; separate into features and target
     data = np.load(filename)['arr_0']
-    X = data[:,0:173]
+    X = data[:, 0:173]
     y = data[:, 173]
 
     # split into 80/20 train-test
@@ -95,7 +100,7 @@ def class31(filename):
 
         # Apend the model number
         scores = []
-        scores.append(i+1)
+        scores.append(i + 1)
 
         # Append accuracy and keep track of best
         acc = accuracy(cm)
@@ -113,7 +118,7 @@ def class31(filename):
 
         # add to list of all models
         scoreList.append(scores)
-        print("Model", i+1,"done.")
+        print("Model", i + 1, "done.")
 
     # write list of scores for each model to csv
     with open('a1_3.1.csv', 'w', newline='') as file:
@@ -121,10 +126,10 @@ def class31(filename):
         writer.writerows(scoreList)
 
     print("Best Model:", iBest)
-    return (X_train, X_test, y_train, y_test,iBest)
+    return (X_train, X_test, y_train, y_test, iBest)
 
 
-def class32(X_train, X_test, y_train, y_test,iBest):
+def class32(X_train, X_test, y_train, y_test, iBest):
     ''' This function performs experiment 3.2
 
     Parameters:
@@ -148,7 +153,7 @@ def class32(X_train, X_test, y_train, y_test,iBest):
     for l in lengths:
 
         # generate a random list of indices of size l in range (0, train size)
-        idx = np.random.choice(a=X_train.shape[0], size = l)
+        idx = np.random.choice(a=X_train.shape[0], size=l)
 
         # create random samples using those indices
         X_sample = X_train[idx]
@@ -172,6 +177,7 @@ def class32(X_train, X_test, y_train, y_test,iBest):
 
     return (X_1k, y_1k)
 
+
 def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
     ''' This function performs experiment 3.3
 
@@ -184,7 +190,7 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
        X_1k: numPy array, just 1K rows of X_train (from task 3.2)
        y_1k: numPy array, just 1K rows of y_train (from task 3.2)
     '''
-    model = models[i-1]
+    model = models[i - 1]
     values_for_csv = []
 
     for k in [5, 10, 20, 30, 40, 50]:
@@ -192,12 +198,13 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
         p_vals = [k]
 
         # create selector object
-        selector= SelectKBest(f_classif, k)
+        selector = SelectKBest(f_classif, k)
 
         # fit selector on 1K training data and print indices of top k features
         selector.fit(X_1k, y_1k)
         idx_1K = selector.pvalues_.argsort()[:k]
         print("size= 1K, k=", k, ":", idx_1K)
+        print("p-values:", selector.pvalues_[idx_1K])
 
         # when k is 5, fit using best model and evaluate
         if k == 5:
@@ -214,6 +221,7 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
         selector.fit(X_train, y_train)
         idx_32K = selector.pvalues_.argsort()[:k]
         print("size= 32K, k=", k, ":", idx_32K)
+        print("p-values:", selector.pvalues_[idx_32K])
         print("Common Values:", set(idx_1K) & set(idx_32K))
         print()
 
@@ -241,7 +249,7 @@ def class33(X_train, X_test, y_train, y_test, i, X_1k, y_1k):
         writer.writerows(values_for_csv)
 
 
-def class34( filename, i ):
+def class34(filename, i):
     ''' This function performs experiment 3.4
 
     Parameters
@@ -251,18 +259,18 @@ def class34( filename, i ):
 
     # load data; separate into features and target
     data = np.load(filename)['arr_0']
-    X = data[:,0:173]
+    X = data[:, 0:173]
     y = data[:, 173]
 
     # create KFold object with shuffle and 5 splits
     kf = KFold(n_splits=5, shuffle=True)
 
     # Iterate across each model
-    acc_across_models =[]
+    acc_across_models = []
     for k, model in enumerate(models):
 
         # list to hold accuracy across folds
-        acc_across_folds=[]
+        acc_across_folds = []
 
         # iterate across folds
         for train_idx, test_idx in kf.split(X):
@@ -281,20 +289,20 @@ def class34( filename, i ):
 
         # store accuracies for model across folds
         acc_across_models.append(acc_across_folds)
-        print("Model", k+1, "done.")
+        print("Model", k + 1, "done.")
 
     # identify best classifier and its scores
-    best_model_scores = acc_across_models[i-1]
+    best_model_scores = acc_across_models[i - 1]
 
     # create list to hold p values
-    p_values=[]
+    p_values = []
 
     # iterate through saved scores
     for scores in acc_across_models:
 
         # save p-values comparing other scores to the best model scores
         if scores is not best_model_scores:
-            p_values.append(stats.ttest_rel(best_model_scores,scores)[1])
+            p_values.append(stats.ttest_rel(best_model_scores, scores)[1])
 
     # write out all results to a csv file
     acc_across_models.append(p_values)
@@ -305,16 +313,17 @@ def class34( filename, i ):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Classify each .')
-    parser.add_argument("-i", "--input", help="the input npz file from Task 2", required=True)
+    parser.add_argument(
+        "-i", "--input", help="the input npz file from Task 2", required=True)
     args = parser.parse_args()
 
     # TODO : complete each classification experiment, in sequence.
     print("Starting Step 1:")
-    X_train, X_test, y_train, y_test,iBest = class31(args.input)
+    X_train, X_test, y_train, y_test, iBest = class31(args.input)
     #X_train, X_test, y_train, y_test,iBest = get_data(args.input)
 
     print("\nStarting Step 2:")
-    X_1k, y_1k = class32(X_train, X_test, y_train, y_test,iBest)
+    X_1k, y_1k = class32(X_train, X_test, y_train, y_test, iBest)
 
     print("\nStarting Step 3:")
     class33(X_train, X_test, y_train, y_test, iBest, X_1k, y_1k)
