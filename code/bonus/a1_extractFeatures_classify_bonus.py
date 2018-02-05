@@ -8,13 +8,15 @@ import re
 import csv
 
 from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfVectorizer
+
 
 from sklearn.svm import SVC, LinearSVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import AdaBoostClassifier
+from sklearn.linear_model import LogisticRegression
 
 # Load the models
 svcLinear = LinearSVC()
@@ -22,7 +24,9 @@ svcRBF = SVC(kernel='rbf')
 rf = RandomForestClassifier(n_estimators=10, max_depth=5)
 mlp = MLPClassifier(alpha=0.05)
 adaboost = AdaBoostClassifier()
-models = [svcLinear, rf, adaboost]
+lr = LogisticRegression()
+
+models = [svcLinear, rf, adaboost, lr]
 
 # Open the stop words path
 stopWordPath = '/u/cs401/Wordlists/abbrev.english'
@@ -66,7 +70,8 @@ def main(args):
         # format: (model, mean score, scores across folds)
         scores = []
         for i, model in enumerate(models):
-            score = cross_val_score(model, X_bag, Y, cv=5)
+            cv = KFold(5, shuffle=True)
+            score = cross_val_score(model, X_bag, Y, cv=cv)
             score_summary = [i + 1, score.mean()]
             score_summary.extend(score)
             print(score_summary)

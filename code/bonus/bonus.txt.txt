@@ -1,0 +1,47 @@
+# Background
+While working on the assignment, I began wondering what value all of the text processing and feature processing is bringing to this particular classification task. 
+In previous projects, I used very naive Bag of Words models which worked fairly well and I was interested in determing how such a model would perform here. 
+Therefore, for the bonus, I will be investigating a unigram and bigram data model approach to this classification task. 
+
+# Hypothesis
+I expect that the bag of words data representation may perform better because word frequencies could be more meaningful than counting the nouns/verbs/pronouns/etc. or looking at sentiment scores. 
+My reasoning is that, in any classification task, it is important for the data repesentations to be representative of the target categories. 
+In a political setting, rhetoric (ex. Fake News) may be a more meaningful representation of a community. 
+
+# Preprocessing (a1_preproc_bonus.py)
+For my analysis, I will only perform the following pre-processing to each comment:
+1) Remove HTML character codes and URLs
+2) Remove all new line characters
+3) Remove all punctuation since we're mainly investigating word choice
+
+# Data Model and Classification Model (a1_extractFeatures_classify_bonus.py)
+Following this, I will prepare the model in SKLearn:
+1) Use CountVectorizer to create bag of words with both (1,1) and (2,2) for n-grams.
+	- Stop words as identified in the provided StopWords file are removed by CountVectorizer
+	- Note: Adaboost is very slow to train with bigrams (may be a good idea to remove this from the model list if you plan on running the code as it can take up to an hour!) 
+2) Use Linear SVC, Random Forest, AdaBoost and Logistic Regression Classifiers (models are numbered in this order). 
+	- I found that both the SVC with an RBF Kernel and MLP trained extremely slow (about 1-2 hours for cross-validation) and score poorly anyways so I dropped them from the list of models. 
+	- The reason for slow training may be due to sparsity in the bag of words models
+3) Use 5-Fold cross validation with shuffling for evaluation
+4) Write results to a CSV File
+
+# Interpretting the a1_bonus.csv
+Line Format (Model Number, Mean Accuracy Across Folds, Accuracy K1, Accuracy K2, Accuracy K3, Accuracy K4, AccuracyK5)
+1) Lines 1-4 Unigram representation for each classification model
+2) Lines 4-8 Bigram representation for each classification model
+
+# Discussion of Results
+Given that the best overall accuracy found in the actual assignment was around ~40%, this is the baseline to beat.
+In the bag of words feature reprsentation, there is a notable weakness: any n-grams found in the test set that do not exist in the training set are discluded. This amounts to disregarding potentially useful information. Furthermore, although stop words are removed, the features aren't scaled so important but low frequency words aren't given as much weight.
+Despite these flaws, the bag of words representation still performs comparatively well.
+
+With linear classifiers, the unigram model outperforms the complex feature representation used in the assignments scoring 48% mean accuracy across folds with linear SVC and 51% mean accuracy across folds with logistic regression. 
+Interestingly, the ensemble methods used here (Random Forest and Adaboost) both perform similarly to the original feature representation with the unigram model. However, classification performance takes a significant dip when switching to the bigram model.  
+This may be due to the classification models overfitting to the data. Furthermore, Adaboost took 30+ minutes to train with the bigram model suggesting that the data sparsity is to blame. This does not imply that linear models are good at the classification task but rather that they are performing better due to the bag of words feature representation. 
+
+I suspect that proper hyperparameter tuning, via grid-search, can help alleviate the overfitting issue but this doesn't directly solve data sparsity which is intrinsic to n>1 n-gram models. Consequently, it is best to focus on unigram models instead.
+What's interesting is that this minimal unigram model, which required comparately no preprocessing and feature extraction, generalizes better than the original feature space. 
+The result agrees with my hypothesis: word choice may be a better feature representation than grammar counts / sentiment for characterizing the political affiliation of a post. 
+This further implies that throwing a lot of potentially relevant data at a model isn't always the best approach. However, with more complex classification tasks, a feature rich data representation may be the way to go. 
+
+In all situations, it is best to experiment and use the most reliable methodology available.  
