@@ -15,7 +15,7 @@ stopWordPath = '/u/cs401/Wordlists/abbrev.english'
 abbrevWordPath = '/u/cs401/Wordlists/StopWords'
 
 # For testing on my local machine
-Windows = True
+Windows = False
 if Windows:
     indir = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\\data\\';
     stopWordPath = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\Wordlists\\StopWords'

@@ -30,7 +30,7 @@ models = [svcLinear, rf, adaboost, lr]
 
 # Open the stop words path
 stopWordPath = '/u/cs401/Wordlists/abbrev.english'
-Windows = True
+Windows = False
 if Windows:
     stopWordPath = 'G:\\OneDrive - University of Toronto\\MScAC\\NLP\\NLP-Reddit-Political-Persuasion\Wordlists\\StopWords'
 
